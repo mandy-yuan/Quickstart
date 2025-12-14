@@ -33,7 +33,7 @@ public class ScorePreloadsBlue extends OpMode {
 
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose scorePose = new Pose(45, 110, Math.toRadians(135));
+    private final Pose scorePose = new Pose(45, 115, Math.toRadians(135));
     private Path scorePreload;
     //private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
