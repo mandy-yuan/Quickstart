@@ -168,27 +168,12 @@ public class CombinedTeleOp extends OpMode {
         if (gamepad2.xWasPressed()) {
             spindexerSubsystem.rotateSpindexerIntake();
         }
-        //if (gamepad2.rightBumperWasPressed()) {
-        //    spindexerSubsystem.rotateSpindexerIntake();
-        //}
 
-        if (gamepad2.right_trigger > 0) {
-            //shooterMotor.setPower(1);
-            shooterSubsystem.revToRPM(6000);
-        } else {
-            shooterSubsystem.stop();
-        }
-
-        if (gamepad2.a) {
-            serializerServo.setPosition(0.7);
-        } else {
-            serializerServo.setPosition(0.48);
-        }
 
         if (gamepad2.b) {
-            intakeMotor.setPower(0.5);
+            intakeMotor.setPower(-0.65);
         } else if(gamepad2.left_bumper){
-            intakeMotor.setPower(-0.5);
+            intakeMotor.setPower(0.3);
         }
         else {
             intakeMotor.setPower(0);
