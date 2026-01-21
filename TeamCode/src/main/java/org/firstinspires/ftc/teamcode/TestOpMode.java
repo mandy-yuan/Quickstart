@@ -32,7 +32,6 @@ public class TestOpMode extends OpMode {
     public void init() {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
     }
-
     public void start() {
 
     }
