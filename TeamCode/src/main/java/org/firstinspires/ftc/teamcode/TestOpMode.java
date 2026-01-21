@@ -24,7 +24,6 @@ public class TestOpMode extends OpMode {
         shooterSubsystem = new ShooterSubsystem(shooterMotor);
         serializerServo = hardwareMap.get(Servo.class, "serializer");
     }
-
     public void start() {
 
     }
