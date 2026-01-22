@@ -4,11 +4,9 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
-//import com.pedropathing.util.Timer;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -16,11 +14,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
 public class ScorePreloadsBlue extends OpMode {
-    private DcMotorEx shooterMotor;
-    private DcMotorEx intakeMotor;
-    private Servo spindexerServo;
+    private DcMotorEx shooterMotor1;
 
-    private Servo serializerServo;
+    private DcMotorEx shooterMotor2;
+    private DcMotorEx intakeMotor;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -28,13 +25,11 @@ public class ScorePreloadsBlue extends OpMode {
     private int pathState;
 
     private ShooterSubsystem shooterSubsystem;
-    private SpindexerSubsystem spindexerSubsystem;
 
 
-
+//put intake next to wall
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
     private final Pose scorePose = new Pose(50, 90, Math.toRadians(135));
-
     private final Pose endPose = new Pose(50, 55, Math.toRadians(180));
     private Path scorePreload;
     private Path leaveShootingZone;
@@ -47,37 +42,29 @@ public class ScorePreloadsBlue extends OpMode {
 
         leaveShootingZone = new Path(new BezierLine(scorePose, endPose));
         leaveShootingZone.setLinearHeadingInterpolation(scorePose.getHeading(), endPose.getHeading());
+
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
     }
 
     public void autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                shooterSubsystem.revToRPM(3000);
-                intakeMotor.setPower(-0.2);
+                shooterSubsystem.revToRPM(2000);
                 follower.followPath(scorePreload);
                 setPathState(1);
-                break;
-            case 1:
-
             /* You could check for
             - Follower State: "if(!follower.isBusy()) {}"
             - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
             - Robot Position: "if(follower.getPose().getX() > 36) {}"
             */
 
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Preload */
-                    scorePreloads();
+                /*  will wait until the robot position is close (1 inch away) from the scorePose's position */
+        if(!follower.isBusy()) {
+            /* Score Preload */
+            if(actionTimer.getElapsedTimeSeconds()<2){
+                intakeMotor.setPower(-0.5);
+            }
+            follower.followPath(leaveShootingZone);
 
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                follower.followPath(leaveShootingZone);
-                break;
         }
     }
 
@@ -87,26 +74,6 @@ public class ScorePreloadsBlue extends OpMode {
         pathTimer.resetTimer();
     }
 
-    public void scorePreloads() {
-        for (int i = 0; i < 3; i ++) {
-            actionTimer.resetTimer();
-            spindexerSubsystem.rotateSpindexerShooter();
-            while (actionTimer.getElapsedTimeSeconds() < 0.7) {
-
-            }
-
-            serializerServo.setPosition(0.7);
-            actionTimer.resetTimer();
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
-            }
-            actionTimer.resetTimer();
-            serializerServo.setPosition(0.48);
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
-            }
-        }
-    }
 
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
@@ -126,12 +93,10 @@ public class ScorePreloadsBlue extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        spindexerServo = hardwareMap.get(Servo.class, "spindexer");
-        serializerServo = hardwareMap.get(Servo.class, "serializer");
-        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
+        shooterMotor1 = hardwareMap.get(DcMotorEx.class, "shooter1");
+        shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        shooterSubsystem = new ShooterSubsystem(shooterMotor);
-        spindexerSubsystem = new SpindexerSubsystem(spindexerServo);
+        shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
