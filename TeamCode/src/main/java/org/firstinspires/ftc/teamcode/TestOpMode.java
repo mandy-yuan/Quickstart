@@ -45,6 +45,14 @@ public class TestOpMode extends OpMode {
         else {
             intakeMotor.setPower(0);
         }
+
+        if(gamepad2.right_trigger>0){
+            shooterSubsystem.setPowerTo(0.8);
+        }
+        else{
+            shooterSubsystem.stop();
+        }
+
     }
     public void stop() {
 

@@ -16,7 +16,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
 public class TaxiRed extends OpMode {
-    private DcMotorEx shooterMotor;
+    private DcMotorEx shooterMotor1;
+
+    private DcMotorEx shooterMotor2;
+
     private DcMotorEx intakeMotor;
     private Servo spindexerServo;
 
@@ -104,11 +107,10 @@ public class TaxiRed extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        spindexerServo = hardwareMap.get(Servo.class, "spindexer");
-        serializerServo = hardwareMap.get(Servo.class, "serializer");
-        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
+        shooterMotor1 = hardwareMap.get(DcMotorEx.class, "shooter1");
+        shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        shooterSubsystem = new ShooterSubsystem(shooterMotor);
+        shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
         spindexerSubsystem = new SpindexerSubsystem(spindexerServo);
 
         pathTimer = new Timer();

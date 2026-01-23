@@ -63,27 +63,6 @@ public class TaxiBlue extends OpMode {
         pathTimer.resetTimer();
     }
 
-    public void scorePreloads() {
-        for (int i = 0; i < 3; i ++) {
-            actionTimer.resetTimer();
-            spindexerSubsystem.rotateSpindexerShooter();
-            while (actionTimer.getElapsedTimeSeconds() < 0.7) {
-
-            }
-
-            serializerServo.setPosition(0.7);
-            actionTimer.resetTimer();
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
-            }
-            actionTimer.resetTimer();
-            serializerServo.setPosition(0.48);
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
-            }
-        }
-    }
-
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
@@ -106,7 +85,7 @@ public class TaxiBlue extends OpMode {
         serializerServo = hardwareMap.get(Servo.class, "serializer");
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        shooterSubsystem = new ShooterSubsystem(shooterMotor);
+//        shooterSubsystem = new ShooterSubsystem(shooterMotor1, shoo);
         spindexerSubsystem = new SpindexerSubsystem(spindexerServo);
 
         pathTimer = new Timer();

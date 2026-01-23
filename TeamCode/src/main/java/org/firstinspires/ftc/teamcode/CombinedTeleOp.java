@@ -12,39 +12,13 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-
+import com.pedropathing.util.Timer;
 
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp
 public class CombinedTeleOp extends OpMode {
@@ -56,22 +30,22 @@ public class CombinedTeleOp extends OpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
-    private Servo spindexerServo;
     private DcMotorEx intakeMotor;
-    private SpindexerSubsystem spindexerSubsystem;
     private DcMotorEx shooterMotor1;
 
     private DcMotorEx shooterMotor2;
-    private Servo serializerServo;
 
-    private static final int SPINDEXER_TICKS_PER_REVOLUTION = 1120;
     private ShooterSubsystem shooterSubsystem;
+
+    private Timer actionTimer;
+
+
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
 
-        follower.setStartingPose(startingPose == null ? new Pose(72, 72, 0) : startingPose);
+//        follower.setStartingPose(startingPose == null ? new Pose(72, 72, 0) : startingPose);
 
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -80,13 +54,12 @@ public class CombinedTeleOp extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 72))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
-        spindexerServo = hardwareMap.get(Servo.class, "spindexer");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        spindexerSubsystem = new SpindexerSubsystem(spindexerServo);
         shooterMotor1 = hardwareMap.get(DcMotorEx.class, "shooter1");
         shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
-        serializerServo = hardwareMap.get(Servo.class, "serializer");
+
+        actionTimer = new Timer();
     }
 
     @Override
@@ -95,7 +68,6 @@ public class CombinedTeleOp extends OpMode {
         //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
         //If you don't pass anything in, it uses the default (false)
         follower.startTeleopDrive();
-        spindexerServo.setPosition(0);
     }
 
     @Override
@@ -133,17 +105,17 @@ public class CombinedTeleOp extends OpMode {
             );
         }
 
-        //Automated PathFollowing
-        if (gamepad1.aWasPressed()) {
-            follower.followPath(pathChain.get());
-            automatedDrive = true;
-        }
-
-        //Stop automated following if the follower is done
-        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
-            follower.startTeleopDrive();
-            automatedDrive = false;
-        }
+//        //Automated PathFollowing
+//        if (gamepad1.aWasPressed()) {
+//            follower.followPath(pathChain.get());
+//            automatedDrive = true;
+//        }
+//
+//        //Stop automated following if the follower is done
+//        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
+//            follower.startTeleopDrive();
+//            automatedDrive = false;
+//        }
 
 //        //Slow Mode
 //        if (gamepad1.rightBumperWasPressed()) {
@@ -176,10 +148,21 @@ public class CombinedTeleOp extends OpMode {
         }
 
         if(gamepad2.right_trigger>0){
-            shooterSubsystem.revToRPM(6000);
+            shooterSubsystem.setPowerTo(1);
+        }
+        else if(gamepad2.y){
+            shooterSubsystem.setPowerTo(-0.7);
         }
         else{
             shooterSubsystem.stop();
+        }
+
+        if(gamepad2.x){
+            if(actionTimer.getElapsedTimeSeconds()>1){
+                shooterSubsystem.setPowerTo(-0.7);
+                actionTimer.resetTimer();
+            }
+
         }
 
 

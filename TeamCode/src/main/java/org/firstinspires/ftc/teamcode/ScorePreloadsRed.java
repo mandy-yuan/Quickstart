@@ -14,7 +14,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
 public class ScorePreloadsRed extends OpMode {
-    private DcMotorEx shooterMotor;
+    private DcMotorEx shooterMotor1;
+
+    private DcMotorEx shooterMotor2;
     private DcMotorEx intakeMotor;
     private Servo spindexerServo;
 
@@ -50,60 +52,29 @@ public class ScorePreloadsRed extends OpMode {
     }
 
     public void autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                shooterSubsystem.revToRPM(2000);
-                intakeMotor.setPower(-0.2);
-                follower.followPath(scorePreload);
-                setPathState(1);
-                break;
-            case 1:
-
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
-
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Preload */
-                    scorePreloads();
-
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                follower.followPath(leaveShootingZone);
-                break;
+        shooterSubsystem.setPowerTo(0.8);
+        intakeMotor.setPower(-0.2);
+        follower.followPath(scorePreload);
+        if(!follower.isBusy()) {
+            scorePreloads();
         }
+        follower.followPath(leaveShootingZone);
     }
 
     /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
-    }
 
     public void scorePreloads() {
-        for (int i = 0; i < 3; i ++) {
             actionTimer.resetTimer();
-            spindexerSubsystem.rotateSpindexerShooter();
-            while (actionTimer.getElapsedTimeSeconds() < 0.7) {
+            shooterSubsystem.setPowerTo(1);
+            while (actionTimer.getElapsedTimeSeconds() < 2) {
 
             }
+            for(int i=0; i<3;i++){
+                intakeMotor.setPower(0.8);
+                while (actionTimer.getElapsedTimeSeconds() < 0.1) {
 
-            serializerServo.setPosition(0.7);
-            actionTimer.resetTimer();
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
+                }
             }
-            actionTimer.resetTimer();
-            serializerServo.setPosition(0.48);
-            while (actionTimer.getElapsedTimeSeconds() < 1) {
-
-            }
-        }
     }
 
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
@@ -124,12 +95,11 @@ public class ScorePreloadsRed extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        spindexerServo = hardwareMap.get(Servo.class, "spindexer");
         serializerServo = hardwareMap.get(Servo.class, "serializer");
-        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
+        shooterMotor1 = hardwareMap.get(DcMotorEx.class, "shooter1");
+        shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        shooterSubsystem = new ShooterSubsystem(shooterMotor);
-        spindexerSubsystem = new SpindexerSubsystem(spindexerServo);
+        shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
@@ -153,7 +123,6 @@ public class ScorePreloadsRed extends OpMode {
     public void start() {
         intakeMotor.setPower(-0.2);
         opmodeTimer.resetTimer();
-        setPathState(0);
     }
 
     /** We do not use this because everything should automatically disable **/
