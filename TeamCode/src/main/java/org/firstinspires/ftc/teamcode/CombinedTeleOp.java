@@ -12,7 +12,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -29,24 +29,19 @@ public class CombinedTeleOp extends OpMode {
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
-
     private DcMotorEx intakeMotor;
     private DcMotorEx shooterMotor1;
-
     private DcMotorEx shooterMotor2;
-
     private ShooterSubsystem shooterSubsystem;
-
-    private Timer actionTimer;
+    private ElapsedTime timer;
+    private double runtime;
 
 
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-
 //        follower.setStartingPose(startingPose == null ? new Pose(72, 72, 0) : startingPose);
-
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -59,7 +54,8 @@ public class CombinedTeleOp extends OpMode {
         shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
 
-        actionTimer = new Timer();
+        ElapsedTime timer = new ElapsedTime();
+        double runtime = 1.5;
     }
 
     @Override
@@ -76,13 +72,13 @@ public class CombinedTeleOp extends OpMode {
         follower.update();
         telemetryM.update();
 
+        //Driver controls
         if (gamepad1.leftBumperWasPressed()) {
             follower.setPose(new Pose(72, 72, 0));
         }
         if (gamepad1.left_trigger > 0) {
             follower.setPose(new Pose(72, 72, 180));
         }
-
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -110,7 +106,6 @@ public class CombinedTeleOp extends OpMode {
 //            follower.followPath(pathChain.get());
 //            automatedDrive = true;
 //        }
-//
 //        //Stop automated following if the follower is done
 //        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
 //            follower.startTeleopDrive();
@@ -137,8 +132,10 @@ public class CombinedTeleOp extends OpMode {
         telemetryM.debug("automatedDrive", automatedDrive);
 
 
+        //Operator controls
 
-        if (gamepad2.b) {
+        //Intake/unintake
+        if (gamepad2.right_bumper) {
             intakeMotor.setPower(-0.65);
         } else if(gamepad2.left_bumper){
             intakeMotor.setPower(0.3);
@@ -147,25 +144,40 @@ public class CombinedTeleOp extends OpMode {
             intakeMotor.setPower(0);
         }
 
-        if(gamepad2.right_trigger>0){
-            shooterSubsystem.setPowerTo(1);
+        //shooter buttons, 25% power increment at 1.5 seconds
+        if(gamepad2.x){
+            timer.reset();
+            if(timer.seconds()<runtime){
+                shooterSubsystem.setPowerTo(0.1);
+            }
         }
         else if(gamepad2.y){
+            timer.reset();
+            if(timer.seconds()<runtime){
+                shooterSubsystem.setPowerTo(0.75);
+            }
+        }
+        else if(gamepad2.b){
+            timer.reset();
+            if(timer.seconds()<runtime){
+                shooterSubsystem.setPowerTo(0.5);
+            }
+        }
+        else if(gamepad2.a){
+            timer.reset();
+            if(timer.seconds()<runtime){
+                shooterSubsystem.setPowerTo(0.25);
+            }
+        }
+
+        else if(gamepad2.left_trigger>0){
+            timer.reset();
             shooterSubsystem.setPowerTo(-0.7);
         }
         else{
+            timer.reset();
             shooterSubsystem.stop();
         }
-
-        if(gamepad2.x){
-            if(actionTimer.getElapsedTimeSeconds()>1){
-                shooterSubsystem.setPowerTo(-0.7);
-                actionTimer.resetTimer();
-            }
-
-        }
-
-
     }
     public void stop() {}
     }
