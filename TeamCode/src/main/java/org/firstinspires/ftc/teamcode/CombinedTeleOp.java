@@ -33,8 +33,10 @@ public class CombinedTeleOp extends OpMode {
     private DcMotorEx shooterMotor1;
     private DcMotorEx shooterMotor2;
     private ShooterSubsystem shooterSubsystem;
-    private ElapsedTime timer;
-    private double runtime;
+    private ElapsedTime shooterTimer;
+    private ElapsedTime intakeTimer;
+    private double intakeWaitTime;
+    private double shooterWaitTime;
 
     private final Pose farBlue = new Pose(70,25,120);
     private final Pose farRed = new Pose(72,25,60);
@@ -58,8 +60,10 @@ public class CombinedTeleOp extends OpMode {
         shooterMotor2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooterSubsystem = new ShooterSubsystem(shooterMotor1, shooterMotor2);
 
-        timer = new ElapsedTime();
-        double runtime = 1.5;
+        shooterTimer = new ElapsedTime();
+        intakeTimer = new ElapsedTime();
+        double shooterWaitTime = 1.5;
+        double intakeWaitTime = 1.3;
     }
 
     @Override
@@ -139,29 +143,48 @@ public class CombinedTeleOp extends OpMode {
         }
 
         //shooter buttons, 25% power increment at 1.5 seconds
-        if(gamepad2.x && timer.seconds()<runtime){
-            timer.reset();
-            shooterSubsystem.setPowerTo(0.1);
+        if(gamepad2.bWasPressed()){
+            shooterTimer.reset();
+            intakeTimer.reset();
+            if(shooterTimer.seconds()<shooterWaitTime){
+                shooterSubsystem.setPowerTo(1);
+                if(intakeTimer.seconds()<intakeWaitTime){intakeMotor.setPower(-0.65);}
+            }
         }
-        else if(gamepad2.y && timer.seconds()<runtime){
-            timer.reset();
-            shooterSubsystem.setPowerTo(0.75);
+        else if(gamepad2.yWasPressed()){
+            shooterTimer.reset();
+            intakeTimer.reset();
+            if(shooterTimer.seconds()<shooterWaitTime){
+                shooterSubsystem.setPowerTo(0.75);
+                if(intakeTimer.seconds()<intakeWaitTime){intakeMotor.setPower(-0.65);}
+            }
         }
-        else if(gamepad2.b && timer.seconds()<runtime){
-            timer.reset();
-            shooterSubsystem.setPowerTo(0.5);
+        else if(gamepad2.xWasPressed()){
+            shooterTimer.reset();
+            intakeTimer.reset();
+            if(shooterTimer.seconds()<shooterWaitTime){
+                shooterSubsystem.setPowerTo(0.5);
+                if(intakeTimer.seconds()<intakeWaitTime){intakeMotor.setPower(-0.65);}
+            }
         }
-        else if(gamepad2.a && timer.seconds()<runtime){
-            timer.reset();
-            shooterSubsystem.setPowerTo(0.25);
+        else if(gamepad2.aWasPressed()){
+            shooterTimer.reset();
+            intakeTimer.reset();
+            if(shooterTimer.seconds()<shooterWaitTime){
+                shooterSubsystem.setPowerTo(0.25);
+                if(intakeTimer.seconds()<intakeWaitTime){intakeMotor.setPower(-0.65);}
+            }
         }
-
+        else if(gamepad2.right_trigger>0){
+            shooterTimer.reset();
+            shooterSubsystem.setPowerTo(-0.7);
+        }
         else if(gamepad2.left_trigger>0){
-            timer.reset();
+            shooterTimer.reset();
             shooterSubsystem.setPowerTo(-0.7);
         }
         else{
-            timer.reset();
+            shooterTimer.reset();
             shooterSubsystem.stop();
         }
 
